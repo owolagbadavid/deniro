@@ -5,10 +5,12 @@ import DiffView from "./DiffView"
 interface Props {
   file: FileDiff
   fileCache: React.RefObject<Record<string, string[]>>
+  highlightWord?: string | null
   onViewFile: (contentsURL: string, filename: string) => void
+  onTokenClick?: (word: string, rect: DOMRect) => void
 }
 
-export default function FileCard({ file, fileCache, onViewFile }: Props) {
+export default function FileCard({ file, fileCache, highlightWord, onViewFile, onTokenClick }: Props) {
   const [collapsed, setCollapsed] = useState(true)
 
   const statusClass: Record<string, string> = {
@@ -65,7 +67,10 @@ export default function FileCard({ file, fileCache, onViewFile }: Props) {
             patch={file.patch}
             contentsURL={file.contents_url}
             status={file.status}
+            filename={file.filename}
             fileCache={fileCache}
+            highlightWord={highlightWord}
+            onTokenClick={onTokenClick}
           />
         </div>
       )}

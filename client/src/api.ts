@@ -5,6 +5,7 @@ import type {
   Strategy,
   PRFilesResponse,
   PaginatedResponse,
+  CodeSearchResult,
 } from "./types"
 
 class FetchError extends Error {
@@ -22,7 +23,7 @@ async function request<T>(url: string): Promise<T> {
     try {
       const body = await res.json()
       if (body.error) message = body.error
-    } catch {}
+    } catch { /* empty */ }
     throw new FetchError(message, res.status)
   }
   return res.json()
@@ -71,6 +72,16 @@ export async function fetchRawFile(contentsURL: string): Promise<string> {
   })
   if (!res.ok) throw new FetchError("Failed to load file", res.status)
   return res.text()
+}
+
+export async function searchCode(
+  owner: string,
+  repo: string,
+  query: string
+): Promise<CodeSearchResult> {
+  return request<CodeSearchResult>(
+    `/api/repos/${owner}/${repo}/search?q=${encodeURIComponent(query)}`
+  )
 }
 
 export { FetchError }

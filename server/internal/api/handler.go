@@ -170,6 +170,27 @@ func (h *Handler) GetRawFile(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(content))
 }
 
+// GET /api/repos/{owner}/{repo}/search?q=symbol
+func (h *Handler) SearchCode(w http.ResponseWriter, r *http.Request) {
+	owner := r.PathValue("owner")
+	repo := r.PathValue("repo")
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "missing q parameter"})
+		return
+	}
+
+	raw, err := h.ghClient(r).SearchCode(owner, repo, query)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": err.Error()})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(raw)
+}
+
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

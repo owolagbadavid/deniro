@@ -70,3 +70,15 @@ export interface ApiError {
   error: string
   status: number
 }
+
+export interface CodeSearchResult {
+  total_count: number
+  items: CodeSearchItem[]
+}
+
+export interface CodeSearchItem {
+  name: string
+  path: string
+  html_url: string
+  text_matches: { fragment: string }[]
+}

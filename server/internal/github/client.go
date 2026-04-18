@@ -208,6 +208,39 @@ func parseContentsURL(contentsURL string) (owner, repo, path, ref string, err er
 	return parts[0], parts[1], parts[3], u.Query().Get("ref"), nil
 }
 
+// SearchCode searches for code in a repository via the GitHub code search API.
+// Returns the raw JSON response including text_matches fragments.
+func (c *Client) SearchCode(owner, repo, query string) (json.RawMessage, error) {
+	q := url.QueryEscape(fmt.Sprintf("%s repo:%s/%s", query, owner, repo))
+	apiURL := fmt.Sprintf("https://api.github.com/search/code?q=%s&per_page=20", q)
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	// text-match+json enables the text_matches field with match fragments
+	req.Header.Set("Accept", "application/vnd.github.text-match+json")
+	if c.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("github returned %s", resp.Status)
+	}
+
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading body: %w", err)
+	}
+	return json.RawMessage(buf), nil
+}
+
 // getAPI performs a GET request and parses pagination from the Link header.
 func (c *Client) getAPI(apiURL string) (*apiResponse, error) {
 	req, err := http.NewRequest("GET", apiURL, nil)

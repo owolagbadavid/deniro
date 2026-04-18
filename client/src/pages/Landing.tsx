@@ -1,28 +1,26 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Landing() {
-  const navigate = useNavigate()
-  const [input, setInput] = useState("")
-  const [error, setError] = useState("")
+  const navigate = useNavigate();
+  const [input, setInput] = useState("");
+  const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const val = input.trim()
-    const parts = val.split("/")
+    e.preventDefault();
+    const val = input.trim();
+    const parts = val.split("/");
     if (parts.length !== 2 || !parts[0] || !parts[1]) {
-      setError("Enter a valid owner/repo (e.g. facebook/react)")
-      return
+      setError("Enter a valid owner/repo (e.g. facebook/react)");
+      return;
     }
-    navigate(`/${parts[0]}/${parts[1]}`)
+    navigate(`/${parts[0]}/${parts[1]}`);
   }
 
   return (
     <div className="max-w-md mx-auto mt-16 text-center">
-      <h2 className="text-2xl font-semibold mb-2">
-        Customize how you review pull requests
-      </h2>
-      <p className="text-[var(--muted)] mb-6">
+      <h2 className="text-2xl font-semibold mb-2">Customize how you review pull requests</h2>
+      <p className="text-(--muted) mb-6">
         Sign in with GitHub to browse your repos, or enter any public repo below.
       </p>
       <a
@@ -41,8 +39,8 @@ export default function Landing() {
           type="text"
           value={input}
           onChange={(e) => {
-            setInput(e.target.value)
-            setError("")
+            setInput(e.target.value);
+            setError("");
           }}
           placeholder="owner/repo"
           autoComplete="off"
@@ -56,9 +54,7 @@ export default function Landing() {
           Go
         </button>
       </form>
-      {error && (
-        <p className="mt-3 text-sm text-[var(--red)]">{error}</p>
-      )}
+      {error && <p className="mt-3 text-sm text-[var(--red)]">{error}</p>}
     </div>
-  )
+  );
 }

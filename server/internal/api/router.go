@@ -20,6 +20,7 @@ func NewRouter(h *Handler, oauth OAuthConfig, fallbackToken string) http.Handler
 	mux.HandleFunc("GET /api/repos/{owner}/{repo}/pulls", h.ListPRs)
 	mux.HandleFunc("GET /api/repos/{owner}/{repo}/pulls/{number}/files", h.GetPRFiles)
 	mux.HandleFunc("GET /api/raw", h.GetRawFile)
+	mux.HandleFunc("GET /api/repos/{owner}/{repo}/search", h.SearchCode)
 
 	return corsMiddleware(AuthMiddleware(fallbackToken, mux))
 }

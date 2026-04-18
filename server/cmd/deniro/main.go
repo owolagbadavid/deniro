@@ -19,7 +19,7 @@ func main() {
 	token := flag.String("token", os.Getenv("GITHUB_TOKEN"), "fallback GitHub token for unauthenticated requests")
 	clientID := flag.String("client-id", os.Getenv("GITHUB_CLIENT_ID"), "GitHub OAuth App client ID")
 	clientSecret := flag.String("client-secret", os.Getenv("GITHUB_CLIENT_SECRET"), "GitHub OAuth App client secret")
-	baseURL := flag.String("base-url", "", "public base URL (default: http://localhost:<port>)")
+	baseURL := flag.String("base-url", os.Getenv("BASE_URL"), "public base URL (default: http://localhost:<port>)")
 	flag.Parse()
 
 	if *baseURL == "" {

@@ -18,10 +18,14 @@ const tokenKey contextKey = "github_token"
 type OAuthConfig struct {
 	ClientID     string
 	ClientSecret string
-	BaseURL      string // e.g. "http://localhost:3000"
+	BaseURL      string // public URL of this server (for redirect_uri)
+	FrontendURL  string // where to redirect after auth (the frontend origin)
 }
 
 func (o OAuthConfig) redirectURI() string {
+	if o.FrontendURL != "" {
+		return o.FrontendURL + "/auth/callback"
+	}
 	return o.BaseURL + "/auth/callback"
 }
 
@@ -78,27 +82,42 @@ func (o OAuthConfig) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:     "gh_token",
 		Value:    result.AccessToken,
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   86400 * 30, // 30 days
-	})
+	}
+	if strings.HasPrefix(o.BaseURL, "https") {
+		cookie.Secure = true
+		cookie.SameSite = http.SameSiteNoneMode
+	}
+	http.SetCookie(w, cookie)
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"ok":true}`))
 }
 
 // HandleLogout clears the auth cookie.
 func (o OAuthConfig) HandleLogout(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
+	cookie := &http.Cookie{
 		Name:   "gh_token",
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,
-	})
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	}
+	if strings.HasPrefix(o.BaseURL, "https") {
+		cookie.Secure = true
+		cookie.SameSite = http.SameSiteNoneMode
+	}
+	http.SetCookie(w, cookie)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"ok":true}`))
 }
 
 // AuthMiddleware extracts the token from the cookie and adds it to the context.

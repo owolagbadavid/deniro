@@ -10,8 +10,8 @@ func NewRouter(h *Handler, oauth OAuthConfig, fallbackToken string) http.Handler
 
 	// Auth routes
 	mux.HandleFunc("GET /auth/login", oauth.HandleLogin)
-	mux.HandleFunc("GET /auth/callback", oauth.HandleCallback)
-	mux.HandleFunc("GET /auth/logout", oauth.HandleLogout)
+	mux.HandleFunc("POST /auth/callback", oauth.HandleCallback)
+	mux.HandleFunc("POST /auth/logout", oauth.HandleLogout)
 
 	// API routes
 	mux.HandleFunc("GET /api/user", h.GetUser)
@@ -31,6 +31,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 		if origin != "" {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		}
 		if r.Method == "OPTIONS" {

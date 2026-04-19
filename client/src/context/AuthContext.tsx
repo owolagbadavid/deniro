@@ -6,9 +6,10 @@ import { fetchUser } from "../api"
 interface AuthState {
   user: User | null
   loading: boolean
+  clearUser: () => void
 }
 
-const AuthContext = createContext<AuthState>({ user: null, loading: true })
+const AuthContext = createContext<AuthState>({ user: null, loading: true, clearUser: () => {} })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -23,8 +24,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false))
   }, [])
 
+  const clearUser = () => setUser(null)
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, clearUser }}>
       {children}
     </AuthContext.Provider>
   )

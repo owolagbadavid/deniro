@@ -20,6 +20,7 @@ func main() {
 	clientID := flag.String("client-id", os.Getenv("GITHUB_CLIENT_ID"), "GitHub OAuth App client ID")
 	clientSecret := flag.String("client-secret", os.Getenv("GITHUB_CLIENT_SECRET"), "GitHub OAuth App client secret")
 	baseURL := flag.String("base-url", os.Getenv("BASE_URL"), "public base URL (default: http://localhost:<port>)")
+	frontendURL := flag.String("frontend-url", os.Getenv("FRONTEND_URL"), "frontend URL to redirect after auth")
 	flag.Parse()
 
 	if *baseURL == "" {
@@ -30,6 +31,7 @@ func main() {
 		ClientID:     *clientID,
 		ClientSecret: *clientSecret,
 		BaseURL:      *baseURL,
+		FrontendURL:  *frontendURL,
 	}
 
 	// Rate-limited HTTP client shared across all requests

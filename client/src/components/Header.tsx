@@ -1,9 +1,11 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { logout } from "../api";
 
 export default function Header() {
-  const { user } = useAuth();
+  const { user, clearUser } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const crumbs = buildCrumbs(location.pathname);
 
@@ -46,9 +48,12 @@ export default function Header() {
             </Link>
             <img className="w-6 h-6 rounded-full" src={user.avatar_url} alt="" />
             <span className="font-medium">{user.login}</span>
-            <a href="/auth/logout" className="text-[var(--accent)] hover:underline">
+            <button
+              onClick={() => { logout().finally(() => { clearUser(); navigate("/"); }); }}
+              className="text-[var(--accent)] hover:underline"
+            >
               Logout
-            </a>
+            </button>
           </>
         ) : (
           <a

@@ -6,10 +6,16 @@ import Repos from "./pages/Repos";
 import Explore from "./pages/Explore";
 import PRList from "./pages/PRList";
 import PRDetail from "./pages/PRDetail";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
+import { useEffect } from "react";
 
 export default function App() {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    document.title = "deniro";
+  }, []);
 
   if (loading) {
     return (
@@ -29,6 +35,7 @@ export default function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/:owner/:repo" element={<PRList />} />
           <Route path="/:owner/:repo/:number" element={<PRDetail />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

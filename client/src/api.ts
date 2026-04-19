@@ -8,6 +8,8 @@ import type {
   CodeSearchResult,
 } from "./types"
 
+const BASE_URL=import.meta.env.VITE_API_URL;
+
 class FetchError extends Error {
   status: number
   constructor(message: string, status: number) {
@@ -17,7 +19,7 @@ class FetchError extends Error {
 }
 
 async function request<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: "include" })
+  const res = await fetch(BASE_URL+url, { credentials: "include" })
   if (!res.ok) {
     let message = res.statusText
     try {
@@ -67,7 +69,7 @@ export async function fetchStrategies(): Promise<Strategy[]> {
 }
 
 export async function fetchRawFile(contentsURL: string): Promise<string> {
-  const res = await fetch(`/api/raw?url=${encodeURIComponent(contentsURL)}`, {
+  const res = await fetch(BASE_URL+`/api/raw?url=${encodeURIComponent(contentsURL)}`, {
     credentials: "include",
   })
   if (!res.ok) throw new FetchError("Failed to load file", res.status)

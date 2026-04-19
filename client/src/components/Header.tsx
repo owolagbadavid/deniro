@@ -13,7 +13,7 @@ export default function Header() {
     <header className="flex items-center justify-between px-6 py-3 border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-50">
       <div className="flex items-center gap-4">
         <Link to="/" className="text-lg font-semibold tracking-tight hover:opacity-80">
-          deniro
+          Diffr
         </Link>
         <nav className="flex items-center gap-1.5 text-[13px]">
           {crumbs.map((c, i) => (
@@ -49,7 +49,12 @@ export default function Header() {
             <img className="w-6 h-6 rounded-full" src={user.avatar_url} alt="" />
             <span className="font-medium">{user.login}</span>
             <button
-              onClick={() => { logout().finally(() => { clearUser(); navigate("/"); }); }}
+              onClick={() => {
+                logout().finally(() => {
+                  clearUser();
+                  navigate("/");
+                });
+              }}
               className="text-[var(--accent)] hover:underline"
             >
               Logout

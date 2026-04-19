@@ -14,7 +14,7 @@ export default function App() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    document.title = "deniro";
+    document.title = "Diffr";
   }, []);
 
   if (loading) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func init() { Register(topological{}) }
+// func init() { Register(topological{}) }
 
 type topological struct{}
 

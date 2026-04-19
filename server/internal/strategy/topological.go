@@ -51,16 +51,9 @@ func (topological) Organize(files []model.FileDiff) []model.FileGroup {
 	}
 
 	// Kahn's algorithm: files with no in-PR dependencies come first.
+	// inDegree[i] = number of in-PR files that i depends on.
+	// Files with inDegree 0 are dependencies (reviewed first).
 	inDegree := make([]int, n)
-	for i := range deps {
-		for j := range deps[i] {
-			inDegree[j] += 0 // ensure j exists
-			_ = j
-		}
-		// Actually: if i depends on j, then j should come first.
-		// So the edge direction for topological sort is j → i.
-		// inDegree of i = number of dependencies i has that are in the PR.
-	}
 	for i := range deps {
 		inDegree[i] = len(deps[i])
 	}
@@ -112,6 +105,14 @@ var (
 	jsRequireRe = regexp.MustCompile(`require\(["']([^"']+)["']\)`)
 	// Python: import x.y or from x.y import z
 	pyImportRe = regexp.MustCompile(`(?:from|import)\s+([\w.]+)`)
+	// C#: using Namespace.Sub; (not namespace — declarations cause false cycles)
+	csUsingRe = regexp.MustCompile(`using\s+(?:static\s+)?([A-Za-z][\w.]*)\s*;`)
+	// Rust: use crate::module::item; (not mod — declares submodule, not dependency)
+	rustUseRe = regexp.MustCompile(`use\s+([\w:]+)`)
+	// Java: import com.example.Foo;
+	javaImportRe = regexp.MustCompile(`import\s+(?:static\s+)?([\w.]+)\s*;`)
+	// PHP: use Namespace\Class; (not namespace — declarations cause false cycles)
+	phpUseRe = regexp.MustCompile(`use\s+([\w\\\\]+)\s*[;,]`)
 )
 
 // extractImports scans patch lines for import-like statements and returns
@@ -160,6 +161,32 @@ func extractImports(patch string) []string {
 		if strings.HasPrefix(line, "import ") || strings.HasPrefix(line, "from ") {
 			for _, m := range pyImportRe.FindAllStringSubmatch(line, -1) {
 				add(strings.ReplaceAll(m[1], ".", "/"))
+			}
+		}
+		// C#: using Namespace.Sub;
+		if strings.HasPrefix(line, "using ") && strings.HasSuffix(line, ";") {
+			for _, m := range csUsingRe.FindAllStringSubmatch(line, -1) {
+				add(strings.ReplaceAll(m[1], ".", "/"))
+			}
+		}
+		// Rust: use crate::module::item;
+		if strings.HasPrefix(line, "use ") && strings.Contains(line, "::") {
+			for _, m := range rustUseRe.FindAllStringSubmatch(line, -1) {
+				imp := strings.ReplaceAll(m[1], "::", "/")
+				imp = strings.TrimPrefix(imp, "crate/")
+				add(imp)
+			}
+		}
+		// Java: import com.example.Foo;
+		if strings.HasPrefix(line, "import ") && strings.Contains(line, ";") {
+			for _, m := range javaImportRe.FindAllStringSubmatch(line, -1) {
+				add(strings.ReplaceAll(m[1], ".", "/"))
+			}
+		}
+		// PHP: use Namespace\Class;
+		if strings.HasPrefix(line, "use ") && strings.Contains(line, `\`) {
+			for _, m := range phpUseRe.FindAllStringSubmatch(line, -1) {
+				add(strings.ReplaceAll(m[1], `\`, "/"))
 			}
 		}
 	}
